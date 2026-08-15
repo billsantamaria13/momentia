@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Momentia</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg:        hsl(220,15%,8%);
+      --bg-alt:    hsl(220,14%,11%);
+      --surface:   hsl(220,13%,14%);
+      --surface2:  hsl(220,12%,18%);
+      --border:    hsl(220,10%,22%);
+      --border2:   hsl(220,10%,28%);
+      --gold:      hsl(43,74%,62%);
+      --gold-dim:  hsl(43,55%,45%);
+      --gold-glow: hsla(43,74%,62%,.18);
+      --gold-lt:   hsl(43,80%,78%);
+      --text:      hsl(220,10%,92%);
+      --muted:     hsl(220,8%,62%);
+      --faint:     hsl(220,8%,42%);
+      --success:   hsl(142,60%,50%);
+      --error:     hsl(0,68%,62%);
+      --warn:      hsl(38,90%,60%);
+      --r-sm: 6px; --r-md:10px; --r-lg:16px; --r-xl:22px; --r-full:9999px;
+      --ease: cubic-bezier(.4,0,.2,1);
+      --spring: cubic-bezier(.34,1.56,.64,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;font-size:15px}
+    img{display:block;max-width:100%}
+    a{color:inherit;text-decoration:none}
+    button{border:none;background:none;cursor:pointer;font-family:inherit}
+    input,select,textarea{font-family:inherit}
+
+    /* ── LOGIN SCREEN ── */
+    .login-screen{
+      position:fixed;inset:0;z-index:9999;
+      background:var(--bg);
+      display:flex;align-items:center;justify-content:center;
+      flex-direction:column;gap:1.5rem;
+      padding:2rem;
+    }
+    .login-box{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--r-xl);padding:2.5rem;
+      width:100%;max-width:400px;
+      display:flex;flex-direction:column;gap:1.25rem;
+      box-shadow:0 24px 64px hsla(0,0%,0%,.5);
+    }
+    .login-logo{height:60px;object-fit:contain;border-radius:6px;margin:0 auto}
+    .login-title{
+      font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:500;
+      text-align:center;color:var(--text);
+    }
+    .login-sub{font-size:.82rem;color:var(--muted);text-align:center}
+    .login-err{font-size:.8rem;color:var(--error);text-align:center;min-height:1.2em}
+
+    /* ── SHARED FORM ELEMENTS ── */
+    .field{display:flex;flex-direction:column;gap:.4rem}
+    label.lbl{font-size:.78rem;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+    .inp{
+      background:var(--surface2);border:1px solid var(--border);
+      color:var(--text);border-radius:var(--r-md);
+      padding:10px 14px;font-size:.9rem;width:100%;
+      transition:border-color .2s,box-shadow .2s;
+    }
+    .inp:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-glow)}
+    .inp::placeholder{color:var(--faint)}
+    select.inp option{background:var(--surface2)}
+    textarea.inp{resize:vertical;min-height:80px;line-height:1.5}
+
+    /* ── BUTTONS ── */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      gap:7px;padding:10px 20px;border-radius:var(--r-full);
+      font-size:.875rem;font-weight:600;transition:all .2s var(--ease);cursor:pointer;
+    }
+    .btn-gold{background:var(--gold);color:var(--bg)}
+    .btn-gold:hover{background:var(--gold-lt);transform:translateY(-1px);box-shadow:0 6px 20px var(--gold-glow)}
+    .btn-outline{border:1px solid var(--border2);color:var(--muted)}
+    .btn-outline:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-glow)}
+    .btn-danger{border:1px solid hsla(0,68%,62%,.3);color:var(--error)}
+    .btn-danger:hover{background:hsla(0,68%,62%,.12)}
+    .btn-sm{padding:7px 14px;font-size:.8rem}
+    .btn-full{width:100%}
+    .btn-icon{width:34px;height:34px;padding:0;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center}
+
+    /* ── LAYOUT ── */
+    .admin-wrap{display:none;min-height:100vh;flex-direction:column}
+    .admin-wrap.visible{display:flex}
+
+    /* ── TOP BAR ── */
+    .topbar{
+      position:sticky;top:0;z-index:100;
+      background:hsla(220,15%,8%,.9);backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 2rem;height:64px;gap:1rem;
+    }
+    .topbar-left{display:flex;align-items:center;gap:.75rem}
+    .topbar-logo{height:40px;border-radius:4px}
+    .topbar-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--text)}
+    .topbar-badge{
+      background:var(--gold-glow);color:var(--gold);
+      font-size:.7rem;font-weight:700;letter-spacing:.07em;
+      padding:3px 10px;border-radius:var(--r-full);
+      border:1px solid var(--gold-dim);text-transform:uppercase;
+    }
+    .topbar-right{display:flex;align-items:center;gap:.75rem}
+
+    /* ── MAIN CONTENT ── */
+    .admin-main{
+      max-width:1200px;width:100%;margin:0 auto;
+      padding:2rem 2rem 4rem;
+      display:grid;grid-template-columns:1fr 380px;gap:2rem;align-items:start;
+    }
+
+    /* ── SECTION CARDS ── */
+    .card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--r-xl);padding:1.75rem;
+      display:flex;flex-direction:column;gap:1.25rem;
+    }
+    .card-title{
+      font-family:'Cormorant Garamond',serif;font-size:1.4rem;
+      font-weight:500;display:flex;align-items:center;gap:.6rem;
+    }
+    .card-divider{height:1px;background:var(--border);margin:0 -.25rem}
+
+    /* ── FORM GRID ── */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .form-grid .span2{grid-column:1/-1}
+
+    /* ── IMAGE UPLOAD ── */
+    .img-upload-area{
+      border:2px dashed var(--border2);border-radius:var(--r-lg);
+      padding:2rem;text-align:center;
+      cursor:pointer;transition:border-color .2s,background .2s;
+      position:relative;overflow:hidden;
+    }
+    .img-upload-area:hover,.img-upload-area.dragover{
+      border-color:var(--gold);background:var(--gold-glow);
+    }
+    .img-upload-area input[type=file]{
+      position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+    }
+    .img-preview-wrap{
+      width:100%;aspect-ratio:1/1;border-radius:var(--r-md);
+      overflow:hidden;background:var(--surface2);
+      display:flex;align-items:center;justify-content:center;
+      margin-bottom:.75rem;max-height:200px;
+    }
+    .img-preview-wrap img{width:100%;height:100%;object-fit:cover}
+    .img-upload-icon{font-size:2.5rem;margin-bottom:.5rem}
+    .img-upload-text{font-size:.82rem;color:var(--muted);line-height:1.5}
+    .img-upload-hint{font-size:.72rem;color:var(--faint);margin-top:.25rem}
+
+    /* ── PRODUCT LIST ── */
+    .product-list{display:flex;flex-direction:column;gap:.75rem}
+    .prod-item{
+      background:var(--surface2);border:1px solid var(--border);
+      border-radius:var(--r-lg);padding:1rem;
+      display:flex;align-items:center;gap:.875rem;
+      transition:border-color .2s;animation:fadeIn .3s var(--ease);
+    }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .prod-item:hover{border-color:var(--border2)}
+    .prod-thumb{
+      width:64px;height:64px;border-radius:var(--r-md);
+      object-fit:cover;background:var(--surface);flex-shrink:0;
+    }
+    .prod-info{flex:1;min-width:0}
+    .prod-name{font-size:.92rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .prod-meta{font-size:.76rem;color:var(--muted);margin-top:2px}
+    .prod-code{
+      font-size:.68rem;color:var(--faint);font-weight:600;
+      letter-spacing:.06em;margin-top:2px;
+    }
+    .prod-actions{display:flex;gap:.4rem;flex-shrink:0}
+
+    /* ── DISCOUNT SECTION ── */
+    .discount-status{
+      display:flex;align-items:center;gap:.5rem;
+      padding:.75rem 1rem;border-radius:var(--r-md);
+      font-size:.85rem;font-weight:500;
+    }
+    .discount-status.active{background:hsla(142,60%,50%,.1);color:var(--success);border:1px solid hsla(142,60%,50%,.25)}
+    .discount-status.inactive{background:var(--surface2);color:var(--faint);border:1px solid var(--border)}
+    .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .dot.green{background:var(--success)}
+    .dot.grey{background:var(--faint)}
+
+    /* ── EXPORT BOX ── */
+    .export-box{
+      background:var(--surface2);border:1px solid var(--border);
+      border-radius:var(--r-md);padding:1rem;font-size:.78rem;
+      font-family:monospace;color:var(--gold-lt);
+      max-height:180px;overflow-y:auto;white-space:pre-wrap;
+      line-height:1.6;word-break:break-all;
+    }
+
+    /* ── TOAST ── */
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9000;display:flex;flex-direction:column;gap:.5rem}
+    .toast{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--r-lg);padding:12px 18px;
+      font-size:.85rem;display:flex;align-items:center;gap:8px;
+      box-shadow:0 8px 32px hsla(0,0%,0%,.5);
+      animation:toastIn .3s var(--spring);
+    }
+    .toast.ok{border-color:var(--success)}
+    .toast.err{border-color:var(--error)}
+    @keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── EMPTY ── */
+    .empty-list{text-align:center;padding:2rem 1rem;color:var(--faint);font-size:.85rem}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:860px){
+      .admin-main{grid-template-columns:1fr}
+      .form-grid{grid-template-columns:1fr}
+      .form-grid .span2{grid-column:auto}
+    }
+    @media(max-width:480px){
+      .topbar{padding:0 1rem}
+      .admin-main{padding:1rem 1rem 3rem}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════ -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <img src="assets/images/logo.jpg" alt="Momentia" class="login-logo" />
+    <h1 class="login-title">Panel de Administración</h1>
+    <p class="login-sub">Acceso restringido · Solo equipo Momentia</p>
+    <div class="field">
+      <label class="lbl" for="pwd-input">Contraseña</label>
+      <input type="password" id="pwd-input" class="inp" placeholder="••••••••"
+             onkeydown="if(event.key==='Enter')login()" autocomplete="current-password" />
+    </div>
+    <p class="login-err" id="login-err"></p>
+    <button class="btn btn-gold btn-full" onclick="login()">🔐 Entrar</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ADMIN PANEL
+═══════════════════════════════════════ -->
+<div class="admin-wrap" id="admin-wrap">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <img src="assets/images/logo.jpg" alt="Momentia" class="topbar-logo" />
+      <span class="topbar-title">Momentia</span>
+      <span class="topbar-badge">Admin</span>
+    </div>
+    <div class="topbar-right">
+      <a href="index.html" class="btn btn-outline btn-sm" target="_blank">🛍️ Ver tienda</a>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Salir</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+
+    <!-- ── COLUMNA IZQUIERDA: Formulario + Descuentos ── -->
+    <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+      <!-- FORM PRODUCTO -->
+      <div class="card" id="product-form-card">
+        <h2 class="card-title" id="form-title">➕ Nuevo producto</h2>
+
+        <!-- Imagen -->
+        <div class="field">
+          <label class="lbl">Imagen del producto</label>
+          <div class="img-upload-area" id="drop-zone" ondragover="dragOver(event)" ondragleave="dragLeave()" ondrop="dropImg(event)">
+            <input type="file" id="img-file" accept="image/*" onchange="previewImg(this)" />
+            <div id="img-preview-container">
+              <div class="img-upload-icon">🖼️</div>
+              <p class="img-upload-text">Arrastra una imagen aquí<br/>o haz clic para seleccionar</p>
+              <p class="img-upload-hint">JPG, PNG, WEBP · Recomendado: cuadrada 800×800px</p>
+            </div>
+          </div>
+          <!-- Nombre de archivo resultante -->
+          <p class="img-upload-hint" id="img-filename-hint" style="margin-top:.25rem"></p>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <!-- Datos -->
+        <div class="form-grid">
+          <div class="field span2">
+            <label class="lbl" for="f-name">Nombre del producto *</label>
+            <input type="text" id="f-name" class="inp" placeholder="Ej: Box Love & Friendship" maxlength="80" />
+          </div>
+
+          <div class="field span2">
+            <label class="lbl" for="f-desc">Descripción</label>
+            <textarea id="f-desc" class="inp" placeholder="Descripción breve y atractiva del regalo..." maxlength="200"></textarea>
+          </div>
+
+          <div class="field">
+            <label class="lbl" for="f-price">Precio (COP) *</label>
+            <input type="number" id="f-price" class="inp" placeholder="180000" min="0" step="1000" />
+          </div>
+
+          <div class="field">
+            <label class="lbl" for="f-cat">Categoría *</label>
+            <select id="f-cat" class="inp">
+              <option value="">— Selecciona —</option>
+              <option value="amor-amistad">💝 Amor y Amistad</option>
+              <option value="cumpleanos">🎂 Cumpleaños</option>
+              <option value="aniversarios">💍 Aniversarios</option>
+              <option value="san-valentin">💌 San Valentín</option>
+              <option value="dia-madre">🌸 Día de la Madre</option>
+              <option value="dia-padre">👔 Día del Padre</option>
+              <option value="dia-nino">🧸 Día del Niño</option>
+              <option value="grados">🎓 Grados</option>
+              <option value="despedidas">🥂 Despedidas</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          <button class="btn btn-gold" id="save-btn" onclick="saveProduct()">💾 Guardar producto</button>
+          <button class="btn btn-outline" id="cancel-edit-btn" onclick="cancelEdit()" style="display:none">✕ Cancelar</button>
+        </div>
+      </div>
+
+      <!-- DESCUENTOS -->
+      <div class="card">
+        <h2 class="card-title">🎟️ Código de descuento</h2>
+
+        <div class="discount-status inactive" id="discount-status-indicator">
+          <span class="dot grey" id="discount-dot"></span>
+          <span id="discount-status-text">Sin descuento activo</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label class="lbl" for="d-code">Código</label>
+            <input type="text" id="d-code" class="inp" placeholder="Ej: SANVALEN20"
+                   maxlength="20" style="text-transform:uppercase"
+                   oninput="this.value=this.value.toUpperCase()" />
+          </div>
+          <div class="field">
+            <label class="lbl" for="d-value">Descuento (%)</label>
+            <input type="number" id="d-value" class="inp" placeholder="Ej: 20" min="1" max="90" />
+          </div>
+        </div>
+
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+          <button class="btn btn-gold btn-sm" onclick="saveDiscount()">✅ Activar descuento</button>
+          <button class="btn btn-danger btn-sm" onclick="removeDiscount()">🗑️ Desactivar</button>
+        </div>
+
+        <p style="font-size:.76rem;color:var(--faint);line-height:1.5">
+          El código se activa al guardarlo. Los clientes lo ingresan en el carrito.<br/>
+          <strong style="color:var(--warn)">⚠️ No olvides desactivarlo cuando termine la promoción.</strong>
+        </p>
+      </div>
+
+      <!-- EXPORTAR -->
+      <div class="card">
+        <h2 class="card-title">📤 Exportar catálogo</h2>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.5">
+          Copia el código generado y reemplaza el contenido del archivo <code style="color:var(--gold)">products.js</code> en GitHub para publicar los cambios.
+        </p>
+        <button class="btn btn-outline btn-sm" onclick="generateExport()">⚙️ Generar código</button>
+        <div class="export-box" id="export-box" style="display:none"></div>
+        <button class="btn btn-gold btn-sm" id="copy-export-btn" onclick="copyExport()" style="display:none">📋 Copiar al portapapeles</button>
+      </div>
+
+    </div>
+
+    <!-- ── COLUMNA DERECHA: Lista de productos ── -->
+    <div class="card" style="position:sticky;top:80px;max-height:calc(100vh - 100px);overflow-y:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+        <h2 class="card-title">🛍️ Productos <span id="prod-total-badge" style="font-size:.8rem;color:var(--gold);font-family:'Inter',sans-serif;font-weight:600"></span></h2>
+        <button class="btn btn-danger btn-sm" onclick="confirmClearAll()" title="Eliminar todos">🗑️ Vaciar todo</button>
+      </div>
+      <div class="card-divider"></div>
+      <div class="product-list" id="product-list"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast container -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ================================================================
+// ─── CONTRASEÑA ADMIN ───────────────────────────────────────────
+// Cambia esta contraseña cuando quieras
+const ADMIN_PASSWORD = 'momentia2026';
+// ================================================================
+
+const SESSION_KEY    = 'momentia_admin_session';
+const PRODUCTS_KEY   = 'momentia_products_admin';
+const DISCOUNT_KEY   = 'momentia_discount_cfg';
+
+// ── Categorías ──
+const CAT_LABELS = {
+  'amor-amistad': '💝 Amor y Amistad',
+  'cumpleanos':   '🎂 Cumpleaños',
+  'aniversarios': '💍 Aniversarios',
+  'san-valentin': '💌 San Valentín',
+  'dia-madre':    '🌸 Día de la Madre',
+  'dia-padre':    '👔 Día del Padre',
+  'dia-nino':     '🧸 Día del Niño',
+  'grados':       '🎓 Grados',
+  'despedidas':   '🥂 Despedidas',
+};
+
+// ================================================================
+// AUTH
+// ================================================================
+function login() {
+  const pwd = document.getElementById('pwd-input').value;
+  if (pwd === ADMIN_PASSWORD) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-wrap').classList.add('visible');
+    renderProductList();
+    renderDiscountStatus();
+  } else {
+    const errEl = document.getElementById('login-err');
+    errEl.textContent = '❌ Contraseña incorrecta';
+    document.getElementById('pwd-input').value = '';
+    setTimeout(() => errEl.textContent = '', 2500);
+  }
+}
+function logout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+
+// ================================================================
+// STORAGE HELPERS
+// ================================================================
+function getProducts() {
+  try { return JSON.parse(localStorage.getItem(PRODUCTS_KEY)) || getDefaultProducts(); }
+  catch { return getDefaultProducts(); }
+}
+function setProducts(arr) {
+  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(arr));
+}
+function getDiscount() {
+  try { return JSON.parse(localStorage.getItem(DISCOUNT_KEY)) || { code:'', pct:0 }; }
+  catch { return { code:'', pct:0 }; }
+}
+function setDiscount(cfg) {
+  localStorage.setItem(DISCOUNT_KEY, JSON.stringify(cfg));
+}
+
+// Productos iniciales (los 3 de Momentia)
+function getDefaultProducts() {
+  return [
+    {
+      id:       'DET00001',
+      name:     'Box Love & Friendship Champagne',
+      desc:     'Set premium con bouquet de flores secas, chocolates artesanales y champagne Moët & Chandon.',
+      price:    285000,
+      img:      'assets/images/DET00001.jpg',
+      imgBase64: null,
+      category: 'amor-amistad',
+    },
+    {
+      id:       'DET00002',
+      name:     'The Love Collection – Velas Aromáticas',
+      desc:     'Colección de velas de soya artesanales con esencias Rose Blossom y Romantic Nights.',
+      price:    165000,
+      img:      'assets/images/DET00002.jpg',
+      imgBase64: null,
+      category: 'amor-amistad',
+    },
+    {
+      id:       'DET00003',
+      name:     'Canasta Amistad Vineyard',
+      desc:     'Canasta mimbre con vino tinto premium, trufas Aurélia, flores secas y tarjeta personalizada.',
+      price:    220000,
+      img:      'assets/images/DET00003.jpg',
+      imgBase64: null,
+      category: 'amor-amistad',
+    },
+  ];
+}
+
+// ================================================================
+// NEXT ID
+// ================================================================
+function nextId(products) {
+  const nums = products.map(p => parseInt(p.id.replace('DET','')) || 0);
+  const max  = nums.length ? Math.max(...nums) : 0;
+  return 'DET' + String(max + 1).padStart(5, '0');
+}
+
+// ================================================================
+// IMAGE HANDLING
+// ================================================================
+let currentImgBase64 = null;
+let currentImgName   = null;
+
+function previewImg(input) {
+  const file = input.files[0];
+  if (!file) return;
+  loadImageFile(file);
+}
+function dragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('dragover');
+}
+function dragLeave() {
+  document.getElementById('drop-zone').classList.remove('dragover');
+}
+function dropImg(e) {
+  e.preventDefault();
+  dragLeave();
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImageFile(file);
+}
+function loadImageFile(file) {
+  currentImgName = file.name;
+  document.getElementById('img-filename-hint').textContent = `📎 ${file.name}`;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    currentImgBase64 = e.target.result;
+    const container = document.getElementById('img-preview-container');
+    container.innerHTML = `
+      <div class="img-preview-wrap">
+        <img src="${currentImgBase64}" alt="preview" />
+      </div>
+      <p class="img-upload-text" style="font-size:.78rem">Haz clic para cambiar imagen</p>
+    `;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ================================================================
+// SAVE / EDIT / DELETE
+// ================================================================
+let editingId = null;
+
+function saveProduct() {
+  const name  = document.getElementById('f-name').value.trim();
+  const desc  = document.getElementById('f-desc').value.trim();
+  const price = parseFloat(document.getElementById('f-price').value);
+  const cat   = document.getElementById('f-cat').value;
+
+  if (!name)          return showToast('⚠️ Escribe el nombre del producto', 'err');
+  if (!price || price < 0) return showToast('⚠️ Ingresa un precio válido', 'err');
+  if (!cat)           return showToast('⚠️ Selecciona una categoría', 'err');
+
+  const products = getProducts();
+
+  if (editingId) {
+    // Editar existente
+    const idx = products.findIndex(p => p.id === editingId);
+    if (idx === -1) return;
+    products[idx].name     = name;
+    products[idx].desc     = desc;
+    products[idx].price    = price;
+    products[idx].category = cat;
+    if (currentImgBase64) {
+      products[idx].imgBase64 = currentImgBase64;
+      products[idx].img       = currentImgBase64;
+    }
+    setProducts(products);
+    syncToStore(products);
+    showToast(`✅ "${name}" actualizado`, 'ok');
+    cancelEdit();
+  } else {
+    // Nuevo producto
+    const id = nextId(products);
+    const img = currentImgBase64
+      ? currentImgBase64
+      : 'assets/images/' + id + '.jpg';
+
+    products.push({
+      id, name, desc, price,
+      img, imgBase64: currentImgBase64 || null,
+      category: cat,
+    });
+    setProducts(products);
+    syncToStore(products);
+    showToast(`✅ "${name}" agregado como ${id}`, 'ok');
+    resetForm();
+  }
+
+  renderProductList();
+}
+
+function editProduct(id) {
+  const products = getProducts();
+  const p = products.find(pr => pr.id === id);
+  if (!p) return;
+
+  editingId = id;
+  document.getElementById('f-name').value  = p.name;
+  document.getElementById('f-desc').value  = p.desc;
+  document.getElementById('f-price').value = p.price;
+  document.getElementById('f-cat').value   = p.category;
+  document.getElementById('form-title').textContent = `✏️ Editar: ${p.id}`;
+  document.getElementById('save-btn').textContent   = '💾 Guardar cambios';
+  document.getElementById('cancel-edit-btn').style.display = 'inline-flex';
+
+  if (p.imgBase64 || p.img) {
+    currentImgBase64 = p.imgBase64 || null;
+    const src = p.imgBase64 || p.img;
+    document.getElementById('img-preview-container').innerHTML = `
+      <div class="img-preview-wrap"><img src="${src}" alt="preview" /></div>
+      <p class="img-upload-text" style="font-size:.78rem">Haz clic para cambiar imagen</p>
+    `;
+  }
+
+  document.getElementById('product-form-card').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function deleteProduct(id) {
+  if (!confirm(`¿Eliminar el producto ${id}?`)) return;
+  const products = getProducts().filter(p => p.id !== id);
+  setProducts(products);
+  syncToStore(products);
+  renderProductList();
+  showToast(`🗑️ Producto ${id} eliminado`, 'ok');
+}
+
+function cancelEdit() {
+  editingId = null;
+  resetForm();
+  document.getElementById('form-title').textContent           = '➕ Nuevo producto';
+  document.getElementById('save-btn').textContent             = '💾 Guardar producto';
+  document.getElementById('cancel-edit-btn').style.display    = 'none';
+}
+
+function resetForm() {
+  ['f-name','f-desc','f-price'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-cat').value = '';
+  currentImgBase64 = null;
+  currentImgName   = null;
+  document.getElementById('img-filename-hint').textContent = '';
+  document.getElementById('img-preview-container').innerHTML = `
+    <div class="img-upload-icon">🖼️</div>
+    <p class="img-upload-text">Arrastra una imagen aquí<br/>o haz clic para seleccionar</p>
+    <p class="img-upload-hint">JPG, PNG, WEBP · Recomendado: cuadrada 800×800px</p>
+  `;
+}
+
+function confirmClearAll() {
+  if (!confirm('¿Eliminar TODOS los productos? Esta acción no se puede deshacer.')) return;
+  localStorage.removeItem(PRODUCTS_KEY);
+  syncToStore([]);
+  renderProductList();
+  showToast('🗑️ Todos los productos eliminados', 'ok');
+}
+
+// ================================================================
+// SYNC TO STORE (inject into window.PRODUCTS for live preview)
+// ================================================================
+function syncToStore(products) {
+  // Converts base64 images to inline src so index.html can use them
+  if (window.opener) {
+    try { window.opener.PRODUCTS = buildStoreProducts(products); } catch(e) {}
+  }
+}
+
+function buildStoreProducts(products) {
+  return products.map(p => ({
+    id:       p.id,
+    name:     p.name,
+    desc:     p.desc,
+    price:    p.price,
+    img:      p.imgBase64 || p.img,
+    category: p.category,
+  }));
+}
+
+// ================================================================
+// RENDER PRODUCT LIST
+// ================================================================
+function renderProductList() {
+  const products = getProducts();
+  const list     = document.getElementById('product-list');
+  const badge    = document.getElementById('prod-total-badge');
+  badge.textContent = `(${products.length})`;
+
+  if (products.length === 0) {
+    list.innerHTML = '<p class="empty-list">Sin productos aún. ¡Agrega el primero! 🎁</p>';
+    return;
+  }
+
+  list.innerHTML = products.map(p => `
+    <div class="prod-item">
+      <img
+        src="${p.imgBase64 || p.img}"
+        alt="${p.name}"
+        class="prod-thumb"
+        onerror="this.src='assets/images/logo.jpg'"
+      />
+      <div class="prod-info">
+        <p class="prod-name">${p.name}</p>
+        <p class="prod-meta">${formatPrice(p.price)} · ${CAT_LABELS[p.category] || p.category}</p>
+        <p class="prod-code">${p.id}</p>
+      </div>
+      <div class="prod-actions">
+        <button class="btn btn-icon btn-outline btn-sm" onclick="editProduct('${p.id}')" title="Editar">✏️</button>
+        <button class="btn btn-icon btn-danger btn-sm" onclick="deleteProduct('${p.id}')" title="Eliminar">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ================================================================
+// DISCOUNT
+// ================================================================
+function saveDiscount() {
+  const code = document.getElementById('d-code').value.trim().toUpperCase();
+  const pct  = parseFloat(document.getElementById('d-value').value);
+
+  if (!code)        return showToast('⚠️ Escribe el código de descuento', 'err');
+  if (!pct || pct < 1 || pct > 90) return showToast('⚠️ Ingresa un porcentaje válido (1–90)', 'err');
+
+  setDiscount({ code, pct });
+  renderDiscountStatus();
+  showToast(`🎟️ Código "${code}" activado con ${pct}% de descuento`, 'ok');
+}
+
+function removeDiscount() {
+  setDiscount({ code:'', pct:0 });
+  document.getElementById('d-code').value  = '';
+  document.getElementById('d-value').value = '';
+  renderDiscountStatus();
+  showToast('✅ Descuento desactivado', 'ok');
+}
+
+function renderDiscountStatus() {
+  const d      = getDiscount();
+  const indEl  = document.getElementById('discount-status-indicator');
+  const dotEl  = document.getElementById('discount-dot');
+  const txtEl  = document.getElementById('discount-status-text');
+
+  if (d.code && d.pct > 0) {
+    indEl.className = 'discount-status active';
+    dotEl.className = 'dot green';
+    txtEl.textContent = `Activo: ${d.code} → ${d.pct}% de descuento`;
+    document.getElementById('d-code').value  = d.code;
+    document.getElementById('d-value').value = d.pct;
+  } else {
+    indEl.className = 'discount-status inactive';
+    dotEl.className = 'dot grey';
+    txtEl.textContent = 'Sin descuento activo';
+  }
+}
+
+// ================================================================
+// EXPORT
+// ================================================================
+function generateExport() {
+  const products = getProducts();
+  const discount = getDiscount();
+
+  const prodLines = products.map(p => {
+    const imgSrc = p.imgBase64 ? `'assets/images/${p.id}.jpg'` : `'${p.img}'`;
+    return `  {\n    id:       '${p.id}',\n    name:     '${p.name.replace(/'/g,"\\'")}',\n    desc:     '${(p.desc||'').replace(/'/g,"\\'")}',\n    price:    ${p.price},\n    img:      ${imgSrc},\n    category: '${p.category}',\n  }`;
+  }).join(',\n');
+
+  const code = `/* ======= CODIGO DE DESCUENTO =======
+   Código: ${discount.code || '(ninguno)'}
+   Descuento: ${discount.pct || 0}%
+   ================================== */
+const CODIGO    = '${discount.code || ''}';
+const VALOR_DTO = ${discount.pct || 0};
+
+const PRODUCTS = [\n${prodLines}\n];
+
+const CATEGORY_LABELS = {
+  'todos':       '✨ Todos los regalos',
+  'cumpleanos':  '🎂 Cumpleaños',
+  'grados':      '🎓 Grados',
+  'amor-amistad':'💝 Amor y Amistad',
+  'san-valentin':'💌 San Valentín',
+  'dia-nino':    '🧸 Día del Niño',
+  'dia-padre':   '👔 Día del Padre',
+  'dia-madre':   '🌸 Día de la Madre',
+  'despedidas':  '🥂 Despedidas',
+  'aniversarios':'💍 Aniversarios',
+};`;
+
+  const box = document.getElementById('export-box');
+  box.textContent = code;
+  box.style.display = 'block';
+  document.getElementById('copy-export-btn').style.display = 'inline-flex';
+  box.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function copyExport() {
+  const text = document.getElementById('export-box').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('📋 ¡Copiado! Pega en GitHub → products.js', 'ok');
+  }).catch(() => {
+    showToast('No se pudo copiar automáticamente. Selecciona y copia manualmente.', 'err');
+  });
+}
+
+// ================================================================
+// HELPERS
+// ================================================================
+function formatPrice(n) {
+  return '$' + Number(n).toLocaleString('es-CO');
+}
+
+function showToast(msg, type = 'ok') {
+  const wrap  = document.getElementById('toast-wrap');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  wrap.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(8px)';
+    toast.style.transition = 'all .3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 3200);
+}
+
+// ================================================================
+// INIT
+// ================================================================
+if (sessionStorage.getItem(SESSION_KEY) === '1') {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-wrap').classList.add('visible');
+  renderProductList();
+  renderDiscountStatus();
+}
+
+// Allow Enter on password field
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pwd-input')?.focus();
+});
+</script>
+</body>
+</html>

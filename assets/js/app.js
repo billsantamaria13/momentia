@@ -1,7 +1,23 @@
 /**
  * MOMENTIA – APP PRINCIPAL
- * Lógica de UI: navbar, categorías, render de productos, sidebar móvil
+ * Lógica de UI: navbar, categorías, render de productos, sidebar móvil.
+ * Los productos se leen desde admin.html (localStorage) si existen,
+ * de lo contrario usa el catálogo hardcodeado en products.js.
  */
+
+// Sobreescribe PRODUCTS con los del panel admin si hay datos guardados
+(function loadAdminProducts() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('momentia_products_admin'));
+    if (stored && Array.isArray(stored) && stored.length > 0) {
+      // Mapear imgBase64 → img para que la tienda muestre las imágenes subidas
+      window.PRODUCTS = stored.map(p => ({
+        ...p,
+        img: p.imgBase64 || p.img,
+      }));
+    }
+  } catch(e) {}
+})();
 
 // ================================================================
 // NAVBAR SCROLL EFFECT

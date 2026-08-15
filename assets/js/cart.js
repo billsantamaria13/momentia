@@ -2,26 +2,34 @@
  * MOMENTIA – CARRITO DE COMPRAS
  * ============================================================
  * Manejo de carrito temporal con localStorage.
+ * Los descuentos se gestionan desde el panel admin (admin.html).
  * No requiere base de datos.
  */
 
 // ================================================================
 // CONFIGURACIÓN DE DESCUENTOS
 // ================================================================
-/**
- * Para activar un código de descuento en fechas especiales,
- * reemplaza los valores vacíos por código y porcentaje.
- * Ejemplos:
- *   CODIGO   = 'SANVALEN20'  →  código que escribe el cliente
- *   VALOR_DTO = 20           →  porcentaje de descuento (20%)
- *
- * Para desactivar, deja ambas variables vacías ('') o en 0.
- */
+// El descuento se gestiona visualmente desde admin.html.
+// También puedes editarlo aquí manualmente si lo prefieres:
+//
+/* ======= CODIGO DE DESCUENTO (respaldo manual) =======
+   Deja vacío si gestionas desde admin.html
+   const CODIGO    = 'SANVALEN20';  // Ej: código de descuento
+   const VALOR_DTO = 20;            // Ej: 20%
+   ===================================================== */
 
-/* ======= CODIGO DE DESCUENTO ======= */
-const CODIGO    = '';   // Ej: 'SANVALEN20'
-const VALOR_DTO = 0;    // Ej: 20  (significa 20% de descuento)
-/* =================================== */
+// Lee config de descuento del panel admin (prioridad) o usa valores manuales
+function getDiscountConfig() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('momentia_discount_cfg'));
+    if (cfg && cfg.code && cfg.pct > 0) return cfg;
+  } catch(e) {}
+  // Fallback a variables hardcodeadas (si las defines arriba)
+  const CODIGO    = '';  // ← editar aquí si no usas admin.html
+  const VALOR_DTO = 0;   // ← editar aquí si no usas admin.html
+  if (CODIGO && VALOR_DTO > 0) return { code: CODIGO, pct: VALOR_DTO };
+  return { code: '', pct: 0 };
+}
 
 // ================================================================
 // WHATSAPP
@@ -164,12 +172,13 @@ function renderCart() {
 let discountPct = 0;
 
 function applyDiscount() {
-  const input = document.getElementById('discount-code-input');
-  const msgEl = document.getElementById('discount-msg');
-  const code  = input.value.trim().toUpperCase();
+  const input  = document.getElementById('discount-code-input');
+  const msgEl  = document.getElementById('discount-msg');
+  const code   = input.value.trim().toUpperCase();
+  const cfg    = getDiscountConfig();
 
-  // Si no hay códigos activos
-  if (!CODIGO || VALOR_DTO <= 0) {
+  // Sin descuento activo
+  if (!cfg.code || cfg.pct <= 0) {
     msgEl.textContent = '😕 No hay códigos de descuento activos en este momento.';
     msgEl.className = 'discount-msg error';
     discountPct = 0;
@@ -177,8 +186,8 @@ function applyDiscount() {
     return;
   }
 
-  if (code === CODIGO.toUpperCase()) {
-    discountPct = VALOR_DTO;
+  if (code === cfg.code.toUpperCase()) {
+    discountPct = cfg.pct;
     localStorage.setItem('momentia_discount', discountPct);
     msgEl.textContent = `🎉 ¡Código aplicado! ${discountPct}% de descuento`;
     msgEl.className   = 'discount-msg success';
