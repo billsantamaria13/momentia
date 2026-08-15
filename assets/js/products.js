@@ -1,7 +1,7 @@
 /**
  * MOMENTIA – CATÁLOGO DE PRODUCTOS
  * Generado automáticamente desde el panel admin.
- * Última actualización: 15/8/2026, 6:03:54 p. m.
+ * Última actualización: 15/8/2026, 6:04:56 p. m.
  */
 
 /* ======= CODIGO DE DESCUENTO =======
@@ -30,10 +30,10 @@ const PRODUCTS = [
   },
   {
     id:       'DET00003',
-    name:     'Canasta Amistad Vineyard',
-    desc:     'Canasta mimbre con vino tinto premium, trufas Aurélia, flores secas y tarjeta personalizada.',
+    name:     'Panda con arreglo de bombas y dulces',
+    desc:     'Canasta con panda, diversos dulces y golosinas, con globo grande y decoración de arco de globos con mensaje personalizado',
     price:    220000,
-    img:      'assets/images/DET00003.jpg',
+    img:      'assets/images/DET00003.png',
     category: 'amor-amistad',
   }
 ];
