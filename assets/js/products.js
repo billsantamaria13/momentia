@@ -1,7 +1,7 @@
 /**
  * MOMENTIA – CATÁLOGO DE PRODUCTOS
  * Generado automáticamente desde el panel admin.
- * Última actualización: 15/8/2026, 5:59:14 p. m.
+ * Última actualización: 15/8/2026, 6:00:16 p. m.
  */
 
 /* ======= CODIGO DE DESCUENTO =======
