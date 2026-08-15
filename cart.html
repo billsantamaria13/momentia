@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carrito de Compras – Momentia</title>
+  <meta name="description" content="Tu carrito de compras en Momentia. Revisa tus regalos seleccionados y envíanos tu pedido por WhatsApp." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <header class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo" id="nav-logo-link-cart">
+        <img src="assets/images/logo.jpg" alt="Momentia Logo" class="logo-img" />
+      </a>
+      <nav class="nav-links" id="nav-links">
+        <a href="index.html" class="nav-item" id="nav-tienda-cart">🛍️ Tienda</a>
+        <a href="#" class="nav-item" id="nav-contacto-cart" onclick="openWhatsApp()">💬 Contacto</a>
+        <a href="cart.html" class="nav-item cart-nav-btn active" id="nav-carrito-cart">
+          🛒 Carrito <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </nav>
+      <button class="hamburger" id="hamburger" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MOBILE NAV DRAWER ===== -->
+  <div class="mobile-drawer" id="mobile-drawer">
+    <button class="drawer-close" id="drawer-close">✕</button>
+    <a href="index.html" class="drawer-item" onclick="closeDrawer()">🛍️ Tienda</a>
+    <a href="#" class="drawer-item" onclick="openWhatsApp(); closeDrawer()">💬 Contacto</a>
+    <a href="cart.html" class="drawer-item" onclick="closeDrawer()">🛒 Carrito</a>
+  </div>
+  <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+  <!-- ===== CART PAGE ===== -->
+  <main class="cart-page" id="cart-page">
+    <div class="cart-container">
+
+      <!-- Título -->
+      <div class="cart-page-header">
+        <h1 class="cart-page-title">🛒 Tu Carrito</h1>
+        <a href="index.html" class="btn-ghost-sm" id="continue-shopping-btn">← Seguir comprando</a>
+      </div>
+
+      <!-- Items + Resumen -->
+      <div class="cart-layout">
+
+        <!-- Lista de items -->
+        <div class="cart-items-section">
+          <div id="cart-items-list">
+            <!-- items generados por JS -->
+          </div>
+
+          <!-- Empty state -->
+          <div class="cart-empty" id="cart-empty" style="display:none;">
+            <div class="cart-empty-icon">🛍️</div>
+            <h3>Tu carrito está vacío</h3>
+            <p>Explora nuestra colección y encuentra el regalo perfecto</p>
+            <a href="index.html" class="btn-primary" id="explore-store-btn">Explorar tienda</a>
+          </div>
+        </div>
+
+        <!-- Resumen del pedido -->
+        <aside class="cart-summary" id="cart-summary">
+          <h3 class="summary-title">Resumen del pedido</h3>
+
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="cart-subtotal">$0</span>
+          </div>
+
+          <!-- Código de descuento -->
+          <div class="discount-section">
+            <label class="discount-label" for="discount-code-input">Código de descuento</label>
+            <div class="discount-input-row">
+              <input
+                type="text"
+                id="discount-code-input"
+                class="discount-input"
+                placeholder="Ej: SANVALEN20"
+                maxlength="20"
+                autocomplete="off"
+              />
+              <button class="btn-apply-code" id="apply-discount-btn" onclick="applyDiscount()">Aplicar</button>
+            </div>
+            <p class="discount-msg" id="discount-msg"></p>
+          </div>
+
+          <div class="summary-row discount-row" id="discount-row" style="display:none;">
+            <span>Descuento aplicado 🎉</span>
+            <span id="discount-amount" class="discount-value">-$0</span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row summary-total">
+            <span>Total</span>
+            <span id="cart-total">$0</span>
+          </div>
+
+          <p class="summary-note">💡 Los precios son referenciales. Te confirmaremos el valor exacto por WhatsApp.</p>
+
+          <button class="btn-order-whatsapp" id="send-order-btn" onclick="sendOrderWhatsApp()">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            Enviar pedido por WhatsApp
+          </button>
+
+          <button class="btn-clear-cart" id="clear-cart-btn" onclick="clearCart()">🗑️ Vaciar carrito</button>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== FLOATING WHATSAPP ===== -->
+  <button class="whatsapp-float" onclick="openWhatsApp()" id="whatsapp-float-cart" aria-label="Contactar por WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    <span class="wa-tooltip">¡Hablemos!</span>
+  </button>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" id="footer-cart">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="assets/images/logo.jpg" alt="Momentia" class="footer-logo" />
+        <p class="footer-tagline">Creamos momentos,<br/>regalamos recuerdos.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Categorías</h4>
+        <a href="index.html#catalogo">🎁 Todos los regalos</a>
+        <a href="index.html#catalogo">💝 Amor y Amistad</a>
+        <a href="index.html#catalogo">🎂 Cumpleaños</a>
+        <a href="index.html#catalogo">💍 Aniversarios</a>
+      </div>
+      <div class="footer-contact">
+        <h4>Contacto</h4>
+        <a href="#" onclick="openWhatsApp()">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          +57 350 526 7000
+        </a>
+        <a href="mailto:contacto@regalosmomentia.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          contacto@regalosmomentia.com
+        </a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Momentia · Todos los derechos reservados · Hecho con 💛 para ti</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/cart.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
