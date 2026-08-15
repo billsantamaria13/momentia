@@ -1,7 +1,7 @@
 /**
  * MOMENTIA – CATÁLOGO DE PRODUCTOS
  * Generado automáticamente desde el panel admin.
- * Última actualización: 15/8/2026, 6:00:16 p. m.
+ * Última actualización: 15/8/2026, 6:03:54 p. m.
  */
 
 /* ======= CODIGO DE DESCUENTO =======
@@ -22,10 +22,10 @@ const PRODUCTS = [
   },
   {
     id:       'DET00002',
-    name:     'The Love Collection – Velas Aromáticas',
-    desc:     'Colección de velas de soya artesanales con esencias Rose Blossom y Romantic Nights.',
-    price:    165000,
-    img:      'assets/images/DET00002.jpg',
+    name:     'Osos Pareja con Globos y sosas',
+    desc:     'Caja con mensaje Feliz Dia, un par de osos pareja y decoracion con Globs',
+    price:    90000,
+    img:      'assets/images/DET00002.jpeg',
     category: 'amor-amistad',
   },
   {
