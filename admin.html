@@ -206,6 +206,36 @@
       line-height:1.6;word-break:break-all;
     }
 
+    /* ── GITHUB PUBLISH ── */
+    .gh-config-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    .gh-config-grid .span2{grid-column:1/-1}
+    .publish-btn{
+      display:flex;align-items:center;justify-content:center;
+      gap:10px;padding:14px 20px;border-radius:var(--r-full);
+      background:linear-gradient(135deg,hsl(215,70%,42%),hsl(225,70%,52%));
+      color:#fff;font-size:.95rem;font-weight:700;
+      width:100%;border:none;cursor:pointer;
+      transition:opacity .2s,transform .15s,box-shadow .2s;
+      box-shadow:0 6px 24px hsla(220,70%,40%,.35);
+      letter-spacing:.02em;
+    }
+    .publish-btn:hover{opacity:.9;transform:translateY(-2px);box-shadow:0 10px 32px hsla(220,70%,40%,.5)}
+    .publish-btn:active{transform:translateY(0)}
+    .publish-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .publish-status{
+      display:flex;align-items:center;gap:8px;
+      padding:10px 14px;border-radius:var(--r-md);
+      font-size:.83rem;font-weight:500;
+    }
+    .publish-status.idle{background:var(--surface2);color:var(--faint)}
+    .publish-status.loading{background:hsla(215,70%,42%,.15);color:hsl(215,80%,72%);border:1px solid hsla(215,70%,42%,.3)}
+    .publish-status.success{background:hsla(142,60%,50%,.1);color:var(--success);border:1px solid hsla(142,60%,50%,.25)}
+    .publish-status.error{background:hsla(0,68%,62%,.1);color:var(--error);border:1px solid hsla(0,68%,62%,.25)}
+    .spinner{width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .gh-token-hint{font-size:.75rem;color:var(--faint);line-height:1.5}
+    .gh-token-hint a{color:var(--gold);text-decoration:underline}
+
     /* ── TOAST ── */
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9000;display:flex;flex-direction:column;gap:.5rem}
     .toast{
@@ -285,11 +315,11 @@
         <div class="field">
           <label class="lbl">Imagen del producto</label>
           <div class="img-upload-area" id="drop-zone" ondragover="dragOver(event)" ondragleave="dragLeave()" ondrop="dropImg(event)">
-            <input type="file" id="img-file" accept="image/*" onchange="previewImg(this)" />
+            <input type="file" id="img-file" accept=".jpg,.jpeg,.png" onchange="previewImg(this)" />
             <div id="img-preview-container">
               <div class="img-upload-icon">🖼️</div>
               <p class="img-upload-text">Arrastra una imagen aquí<br/>o haz clic para seleccionar</p>
-              <p class="img-upload-hint">JPG, PNG, WEBP · Recomendado: cuadrada 800×800px</p>
+              <p class="img-upload-hint">Solo JPG · JPEG · PNG · Recomendado: cuadrada 800×800px</p>
             </div>
           </div>
           <!-- Nombre de archivo resultante -->
@@ -371,15 +401,62 @@
         </p>
       </div>
 
-      <!-- EXPORTAR -->
-      <div class="card">
-        <h2 class="card-title">📤 Exportar catálogo</h2>
+      <!-- PUBLICAR EN GITHUB -->
+      <div class="card" id="github-card">
+        <h2 class="card-title">🚀 Publicar en la web</h2>
         <p style="font-size:.82rem;color:var(--muted);line-height:1.5">
-          Copia el código generado y reemplaza el contenido del archivo <code style="color:var(--gold)">products.js</code> en GitHub para publicar los cambios.
+          Configura tu repositorio de GitHub una sola vez y luego con un clic
+          los cambios se publican en <strong style="color:var(--gold)">momentia.lat</strong> en ~2 minutos.
         </p>
-        <button class="btn btn-outline btn-sm" onclick="generateExport()">⚙️ Generar código</button>
-        <div class="export-box" id="export-box" style="display:none"></div>
-        <button class="btn btn-gold btn-sm" id="copy-export-btn" onclick="copyExport()" style="display:none">📋 Copiar al portapapeles</button>
+
+        <!-- Status -->
+        <div class="publish-status idle" id="publish-status">
+          <span id="publish-status-icon">⚙️</span>
+          <span id="publish-status-text">Configura GitHub para publicar</span>
+        </div>
+
+        <!-- Botón publicar -->
+        <button class="publish-btn" id="publish-btn" onclick="publishToGitHub()" disabled>
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          Publicar en momentia.lat
+        </button>
+
+        <div class="card-divider"></div>
+        <h3 style="font-size:.85rem;font-weight:600;color:var(--muted);letter-spacing:.05em">CONFIGURACIÓN GITHUB</h3>
+
+        <div class="gh-config-grid">
+          <div class="field span2">
+            <label class="lbl" for="gh-token">🔑 Personal Access Token</label>
+            <input type="password" id="gh-token" class="inp"
+                   placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                   autocomplete="off" />
+            <p class="gh-token-hint">
+              Genera uno en
+              <a href="https://github.com/settings/tokens/new?scopes=repo&description=Momentia+Admin" target="_blank">
+                github.com/settings/tokens
+              </a>
+              → selecciona scope <strong>repo</strong> → Generate token
+            </p>
+          </div>
+          <div class="field">
+            <label class="lbl" for="gh-owner">Usuario GitHub</label>
+            <input type="text" id="gh-owner" class="inp" placeholder="billsantamaria13" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label class="lbl" for="gh-repo">Repositorio</label>
+            <input type="text" id="gh-repo" class="inp" placeholder="billsantamaria13.github.io" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label class="lbl" for="gh-branch">Rama</label>
+            <input type="text" id="gh-branch" class="inp" placeholder="main" value="main" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label class="lbl" for="gh-path">Ruta del archivo</label>
+            <input type="text" id="gh-path" class="inp" placeholder="assets/js/products.js" value="assets/js/products.js" autocomplete="off" />
+          </div>
+        </div>
+
+        <button class="btn btn-outline btn-sm" onclick="saveGitHubConfig()">💾 Guardar configuración</button>
       </div>
 
     </div>
@@ -512,6 +589,7 @@ function nextId(products) {
 // ================================================================
 let currentImgBase64 = null;
 let currentImgName   = null;
+let currentImgExt    = 'jpg';
 
 function previewImg(input) {
   const file = input.files[0];
@@ -532,8 +610,20 @@ function dropImg(e) {
   if (file && file.type.startsWith('image/')) loadImageFile(file);
 }
 function loadImageFile(file) {
-  currentImgName = file.name;
-  document.getElementById('img-filename-hint').textContent = `📎 ${file.name}`;
+  // Validar extensión
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['jpg','jpeg','png'].includes(ext)) {
+    showToast('⚠️ Solo se aceptan archivos JPG, JPEG o PNG', 'err');
+    return;
+  }
+
+  currentImgName   = file.name;
+  currentImgExt    = ext === 'jpeg' ? 'jpg' : ext;  // normaliza jpeg → jpg
+
+  document.getElementById('img-filename-hint').innerHTML =
+    `📎 <strong style="color:var(--gold-lt)">${file.name}</strong> &nbsp;·&nbsp; ` +
+    `<span style="color:var(--muted)">La imagen debe estar en <code style="color:var(--gold)">assets/images/${file.name}</code> en tu proyecto.</span>`;
+
   const reader = new FileReader();
   reader.onload = (e) => {
     currentImgBase64 = e.target.result;
@@ -573,9 +663,9 @@ function saveProduct() {
     products[idx].desc     = desc;
     products[idx].price    = price;
     products[idx].category = cat;
-    if (currentImgBase64) {
+    if (currentImgBase64 && currentImgName) {
       products[idx].imgBase64 = currentImgBase64;
-      products[idx].img       = currentImgBase64;
+      products[idx].img       = 'assets/images/' + currentImgName;  // ruta real
     }
     setProducts(products);
     syncToStore(products);
@@ -583,19 +673,21 @@ function saveProduct() {
     cancelEdit();
   } else {
     // Nuevo producto
-    const id = nextId(products);
-    const img = currentImgBase64
-      ? currentImgBase64
+    const id  = nextId(products);
+    // Ruta de imagen: usa el nombre real del archivo subido
+    const imgPath = currentImgName
+      ? 'assets/images/' + currentImgName
       : 'assets/images/' + id + '.jpg';
 
     products.push({
       id, name, desc, price,
-      img, imgBase64: currentImgBase64 || null,
+      img:      imgPath,
+      imgBase64: currentImgBase64 || null,  // solo para preview en admin
       category: cat,
     });
     setProducts(products);
     syncToStore(products);
-    showToast(`✅ "${name}" agregado como ${id}`, 'ok');
+    showToast(`✅ "${name}" guardado · imagen: ${imgPath}`, 'ok');
     resetForm();
   }
 
@@ -650,11 +742,15 @@ function resetForm() {
   document.getElementById('f-cat').value = '';
   currentImgBase64 = null;
   currentImgName   = null;
+  currentImgExt    = 'jpg';
   document.getElementById('img-filename-hint').textContent = '';
+  // Reset file input
+  const fi = document.getElementById('img-file');
+  if (fi) fi.value = '';
   document.getElementById('img-preview-container').innerHTML = `
     <div class="img-upload-icon">🖼️</div>
     <p class="img-upload-text">Arrastra una imagen aquí<br/>o haz clic para seleccionar</p>
-    <p class="img-upload-hint">JPG, PNG, WEBP · Recomendado: cuadrada 800×800px</p>
+    <p class="img-upload-hint">Solo JPG · JPEG · PNG · Recomendado: cuadrada 800×800px</p>
   `;
 }
 
@@ -765,23 +861,32 @@ function renderDiscountStatus() {
 }
 
 // ================================================================
-// EXPORT
+// BUILD products.js CONTENT
 // ================================================================
-function generateExport() {
+function buildProductsJs() {
   const products = getProducts();
   const discount = getDiscount();
 
   const prodLines = products.map(p => {
-    const imgSrc = p.imgBase64 ? `'assets/images/${p.id}.jpg'` : `'${p.img}'`;
-    return `  {\n    id:       '${p.id}',\n    name:     '${p.name.replace(/'/g,"\\'")}',\n    desc:     '${(p.desc||'').replace(/'/g,"\\'")}',\n    price:    ${p.price},\n    img:      ${imgSrc},\n    category: '${p.category}',\n  }`;
+    // Use real file path (not base64) for GitHub
+    const imgSrc = `'${p.img}'`;
+    const name   = (p.name  || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const desc   = (p.desc  || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `  {\n    id:       '${p.id}',\n    name:     '${name}',\n    desc:     '${desc}',\n    price:    ${p.price},\n    img:      ${imgSrc},\n    category: '${p.category}',\n  }`;
   }).join(',\n');
 
-  const code = `/* ======= CODIGO DE DESCUENTO =======
-   Código: ${discount.code || '(ninguno)'}
-   Descuento: ${discount.pct || 0}%
+  return `/**
+ * MOMENTIA – CATÁLOGO DE PRODUCTOS
+ * Generado automáticamente desde el panel admin.
+ * Última actualización: ${new Date().toLocaleString('es-CO')}
+ */
+
+/* ======= CODIGO DE DESCUENTO =======
+   Código activo : ${discount.code  || '(ninguno)'}
+   Descuento     : ${discount.pct   || 0}%
    ================================== */
 const CODIGO    = '${discount.code || ''}';
-const VALOR_DTO = ${discount.pct || 0};
+const VALOR_DTO = ${discount.pct   || 0};
 
 const PRODUCTS = [\n${prodLines}\n];
 
@@ -796,22 +901,145 @@ const CATEGORY_LABELS = {
   'dia-madre':   '🌸 Día de la Madre',
   'despedidas':  '🥂 Despedidas',
   'aniversarios':'💍 Aniversarios',
-};`;
-
-  const box = document.getElementById('export-box');
-  box.textContent = code;
-  box.style.display = 'block';
-  document.getElementById('copy-export-btn').style.display = 'inline-flex';
-  box.scrollIntoView({ behavior:'smooth', block:'start' });
+};
+`;
 }
 
-function copyExport() {
-  const text = document.getElementById('export-box').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('📋 ¡Copiado! Pega en GitHub → products.js', 'ok');
-  }).catch(() => {
-    showToast('No se pudo copiar automáticamente. Selecciona y copia manualmente.', 'err');
-  });
+// ================================================================
+// GITHUB CONFIG
+// ================================================================
+const GH_CFG_KEY = 'momentia_gh_config';
+
+function saveGitHubConfig() {
+  const token  = document.getElementById('gh-token').value.trim();
+  const owner  = document.getElementById('gh-owner').value.trim();
+  const repo   = document.getElementById('gh-repo').value.trim();
+  const branch = document.getElementById('gh-branch').value.trim() || 'main';
+  const path   = document.getElementById('gh-path').value.trim()   || 'assets/js/products.js';
+
+  if (!token)  return showToast('⚠️ Ingresa tu Personal Access Token', 'err');
+  if (!owner)  return showToast('⚠️ Ingresa tu usuario de GitHub', 'err');
+  if (!repo)   return showToast('⚠️ Ingresa el nombre del repositorio', 'err');
+
+  localStorage.setItem(GH_CFG_KEY, JSON.stringify({ token, owner, repo, branch, path }));
+  updatePublishButton();
+  showToast('✅ Configuración guardada. ¡Ya puedes publicar!', 'ok');
+}
+
+function loadGitHubConfig() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem(GH_CFG_KEY));
+    if (!cfg) return null;
+    if (cfg.token)  document.getElementById('gh-token').value  = cfg.token;
+    if (cfg.owner)  document.getElementById('gh-owner').value  = cfg.owner;
+    if (cfg.repo)   document.getElementById('gh-repo').value   = cfg.repo;
+    if (cfg.branch) document.getElementById('gh-branch').value = cfg.branch;
+    if (cfg.path)   document.getElementById('gh-path').value   = cfg.path;
+    return cfg;
+  } catch { return null; }
+}
+
+function updatePublishButton() {
+  const cfg = JSON.parse(localStorage.getItem(GH_CFG_KEY) || 'null');
+  const btn = document.getElementById('publish-btn');
+  const st  = document.getElementById('publish-status');
+  const stTxt = document.getElementById('publish-status-text');
+  const stIcon = document.getElementById('publish-status-icon');
+  if (cfg && cfg.token && cfg.owner && cfg.repo) {
+    btn.disabled = false;
+    st.className = 'publish-status idle';
+    stIcon.textContent = '✅';
+    stTxt.textContent  = `Listo · ${cfg.owner}/${cfg.repo} (${cfg.branch})`;
+  } else {
+    btn.disabled = true;
+    st.className = 'publish-status idle';
+    stIcon.textContent = '⚙️';
+    stTxt.textContent  = 'Configura GitHub para publicar';
+  }
+}
+
+// ================================================================
+// PUBLISH TO GITHUB VIA API
+// ================================================================
+async function publishToGitHub() {
+  const cfg = JSON.parse(localStorage.getItem(GH_CFG_KEY) || 'null');
+  if (!cfg || !cfg.token) {
+    showToast('⚠️ Primero guarda la configuración de GitHub', 'err');
+    return;
+  }
+
+  const btn    = document.getElementById('publish-btn');
+  const st     = document.getElementById('publish-status');
+  const stTxt  = document.getElementById('publish-status-text');
+  const stIcon = document.getElementById('publish-status-icon');
+
+  // ── UI: loading
+  btn.disabled = true;
+  st.className = 'publish-status loading';
+  stIcon.innerHTML = '<span class="spinner"></span>';
+  stTxt.textContent = 'Conectando con GitHub...';
+
+  const apiBase = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${cfg.path}`;
+  const headers = {
+    'Authorization': `Bearer ${cfg.token}`,
+    'Accept': 'application/vnd.github+json',
+    'Content-Type': 'application/json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+
+  try {
+    // 1. Obtener SHA del archivo actual
+    stTxt.textContent = 'Leyendo archivo actual...';
+    let sha = null;
+    const getRes = await fetch(apiBase + `?ref=${cfg.branch}`, { headers });
+    if (getRes.ok) {
+      const data = await getRes.json();
+      sha = data.sha;
+    } else if (getRes.status !== 404) {
+      const err = await getRes.json();
+      throw new Error(err.message || `Error ${getRes.status}`);
+    }
+
+    // 2. Construir contenido
+    stTxt.textContent = 'Generando catálogo...';
+    const content    = buildProductsJs();
+    const b64content = btoa(unescape(encodeURIComponent(content)));
+
+    // 3. Publicar (create o update)
+    stTxt.textContent = 'Publicando en GitHub...';
+    const body = {
+      message: `✨ Catálogo actualizado desde admin · ${new Date().toLocaleString('es-CO')}`,
+      content: b64content,
+      branch:  cfg.branch,
+    };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(apiBase, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!putRes.ok) {
+      const err = await putRes.json();
+      throw new Error(err.message || `Error ${putRes.status}`);
+    }
+
+    // ── Éxito
+    st.className = 'publish-status success';
+    stIcon.textContent = '🚀';
+    stTxt.textContent  = `¡Publicado! Los cambios estarán en momentia.lat en ~2 min`;
+    showToast('🚀 ¡Catálogo publicado exitosamente en GitHub!', 'ok');
+
+  } catch (err) {
+    st.className = 'publish-status error';
+    stIcon.textContent = '❌';
+    stTxt.textContent  = `Error: ${err.message}`;
+    showToast(`❌ ${err.message}`, 'err');
+    console.error('GitHub publish error:', err);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ================================================================
@@ -843,11 +1071,18 @@ if (sessionStorage.getItem(SESSION_KEY) === '1') {
   document.getElementById('admin-wrap').classList.add('visible');
   renderProductList();
   renderDiscountStatus();
+  loadGitHubConfig();
+  updatePublishButton();
 }
 
 // Allow Enter on password field
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('pwd-input')?.focus();
+  // Also load config if already logged in
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    loadGitHubConfig();
+    updatePublishButton();
+  }
 });
 </script>
 </body>
